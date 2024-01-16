@@ -14,6 +14,7 @@ resource "aws_subnet" "site_public_subnet" {
   vpc_id            = aws_vpc.site_vpc.id
   availability_zone = data.aws_availability_zones.site_azs.names[count.index]
   cidr_block        = element(var.site_vpc_public_subnets, count.index)
+  map_public_ip_on_launch = true
 }
 
 resource "aws_internet_gateway" "site_public_gateway" {
@@ -36,7 +37,7 @@ resource "aws_route_table_association" "site_public_route_table_association" {
   subnet_id      = element(aws_subnet.site_public_subnet.*.id, count.index)
 }
 
-# Public Subnet
+# Private Subnet
 
 resource "aws_subnet" "site_private_subnet" {
   count             = length(var.site_vpc_private_subnets) == length(var.site_vpc_private_subnets) ? 2 : 0
@@ -47,6 +48,7 @@ resource "aws_subnet" "site_private_subnet" {
 
 resource "aws_internet_gateway" "site_private_gateway" {
   vpc_id = aws_vpc.site_vpc.id
+  depends_on = [aws_route_table_association.site_public_route_table_association]
 }
 
 resource "aws_route_table" "site_private_route_table" {

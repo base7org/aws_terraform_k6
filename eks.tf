@@ -9,7 +9,7 @@ resource "aws_eks_cluster" "site_eks" {
 	endpoint_private_access = true
     endpoint_public_access  = true
   }
-  depends_on = [aws_cloudwatch_log_group.site_logs_eks]
+  depends_on = [aws_cloudwatch_log_group.site_logs_eks, aws_internet_gateway.site_private_gateway]
 }
 
 resource "aws_eks_node_group" "site_eks_node_group" {
@@ -33,6 +33,8 @@ resource "null_resource" "update_kubeconfig" {
   provisioner "local-exec" {
     command = "aws eks --region ${var.site_region} update-kubeconfig --name ${aws_eks_cluster.site_eks.name}"
   }
+  
+  depends_on = [aws_eks_node_group.site_eks_node_group, aws_eks_cluster.site_eks]
 }
 
 # Cloudwatch
