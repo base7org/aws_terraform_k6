@@ -27,10 +27,22 @@ variable "site_ttl" {
 
 # VPC Information
 
-variable "site_vpc" {
-  description = "The VPC to be used by the environment."
+variable "site_vpc_block" {
+  description = "The VPC CIDR block."
   type        = string
   default     = "10.0.0.0/16"
+}
+
+variable "site_vpc_public_subnets" {
+  description = "The list of available subnets."
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "site_vpc_private_subnets" {
+  description = "The list of available subnets."
+  type        = list(string)
+  default     = ["10.0.3.0/24", "10.0.4.0/24"]
 }
 
 # EC2 Information

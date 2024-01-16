@@ -12,11 +12,13 @@ resource "aws_instance" "site_instance" {
   user_data = <<-EOL
   #!/bin/bash -xe
 
+  # install and set up apache
   yum update -y
   yum install httpd -y
   systemctl start httpd
   systemctl enable httpd
   echo 'Has anyone really been far even as decided to use even go want to do look more like?' >> /var/www/html/index.html
+  
   EOL
 
 }

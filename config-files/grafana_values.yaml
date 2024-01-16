@@ -1,0 +1,31 @@
+## Ref: https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+
+ingress:
+  enabled: true
+  annotations: 
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  labels: {}
+  path: /grafana/*
+  pathType: ImplementationSpecific
+  hosts: []
+
+## Enable persistence using Persistent Volume Claims
+persistence:
+  type: pvc
+  enabled: true
+  storageClassName: efs-sc
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+# Use an existing secret for the admin user.
+admin:
+  existingSecret: "k6-grafana-info"
+  userKey: k6-admin-user
+  passwordKey: k6-admin-password
+
+env:
+  GF_SERVER_ROOT_URL: /grafana
+  GF_SERVER_SERVE_FROM_SUB_PATH: true
