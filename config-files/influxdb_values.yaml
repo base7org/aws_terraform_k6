@@ -1,0 +1,49 @@
+## Ref: https://github.com/influxdata/helm-charts/blob/master/charts/influxdb/values.yaml
+
+serviceAccount:
+  create: false
+
+startupProbe:
+  enabled: false
+  name:
+  annotations: {}
+
+## Persist data to a persistent volume
+persistence:
+  enabled: true
+  storageClass: efs-sc
+  annotations: {}
+  accessMode: ReadWriteOnce
+  size: 8Gi
+
+## Set default user
+setDefaultUser:
+  enabled: false
+
+## Configure resource requests and limits
+resources:
+  requests:
+    memory: 500Mi
+    cpu: 250m
+  limits:
+    memory: 500Mi
+    cpu: 250m
+
+## The InfluxDB image uses several environment variables to automatically configure certain parts of the server.
+env:
+  - name: INFLUXDB_HTTP_AUTH_ENABLED
+    value: 'true'
+  - name: INFLUXDB_ADMIN_USER
+    value: k6_admin
+  - name: INFLUXDB_USER
+    value: k6_user
+  - name: INFLUXDB_WRITE_USER
+    value: k6_write_user
+  - name: INFLUXDB_READ_USER
+    value: k6_read_user
+  - name: INFLUXDB_DB
+    value: k6_results
+
+## The name of a secret in the same kubernetes namespace which contain values to be added to the environment.
+## This can be used, for example, to set the INFLUXDB_HTTP_SHARED_SECRET environment variable.
+envFromSecret: 'k6-influxdb-info'
