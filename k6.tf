@@ -27,13 +27,13 @@ resource "helm_release" "k6_influxdb" {
 # InfluxDB Secrets
 
 resource "aws_secretsmanager_secret" "k6_influxdb_secret_name" {
-  name = "${var.site_name}-K6InfluxDBCredentials"
+  name = "${var.site_name}K6InfluxDBCredentials"
   depends_on = [null_resource.update_kubeconfig]
 }
 
 resource "aws_secretsmanager_secret_version" "k6_influxdb_secret_add" {
-  secret_id = aws_secretsmanager_secret.k6_grafana_secret_name.name
-  secret_string = "${var.site_name}-InfluxDB"
+  secret_id = aws_secretsmanager_secret.k6_influxdb_secret_name.name
+  secret_string = "InfluxDB"
   depends_on = [aws_secretsmanager_secret.k6_influxdb_secret_name]
 }
 
@@ -62,11 +62,11 @@ resource "aws_efs_file_system" "k6_influxdb_efs" {
 }
 
 resource "aws_efs_mount_target" "k6_influxdb_efs_mount_target" {
-  file_system_id = aws_efs_file_system.k6_influxdb_efs.id
-  for_each = toset(var.site_vpc_private_subnets)
-  subnet_id = each.value
+  file_system_id  = aws_efs_file_system.k6_influxdb_efs.id
+  count           = length(aws_subnet.site_private_subnet) == 2 ? 2 : 0
+  subnet_id       = element(aws_subnet.site_private_subnet.*.id, count.index)
   security_groups = [ module.k6_efs_security_group.security_group_id ]
-  depends_on = [aws_vpc.site_vpc]
+  depends_on      = [aws_vpc.site_vpc]
 }
 
 resource "kubernetes_storage_class" "k6_influxdb_storage_class" {
@@ -169,13 +169,13 @@ resource "helm_release" "grafana" {
 # Grafana Secrets
 
 resource "aws_secretsmanager_secret" "k6_grafana_secret_name" {
-  name = "${var.site_name}-K6GrafanaCredentials"
+  name = "${var.site_name}K6GrafanaCredentials"
   depends_on = [null_resource.update_kubeconfig]
 }
 
 resource "aws_secretsmanager_secret_version" "k6_grafana_secret_add" {
   secret_id = aws_secretsmanager_secret.k6_grafana_secret_name.name
-  secret_string = "${var.site_name}-Grafana"
+  secret_string = "Grafana"
   depends_on = [aws_secretsmanager_secret.k6_grafana_secret_name]
 }
 
@@ -191,7 +191,7 @@ resource "kubernetes_secret" "k6_grafana_info" {
   }
 
   data = {
-    "admin-user" = "k6_grafana_admin" 
-    "admin-password" = jsondecode(data.aws_secretsmanager_secret_version.k6_grafana_secret_read.secret_string)["k6_admin_password"]
+    "k6-admin-user" = "k6_grafana_admin" 
+    "k6-admin-password" = jsondecode(data.aws_secretsmanager_secret_version.k6_grafana_secret_read.secret_string)["k6_admin_password"]
   }
 }
