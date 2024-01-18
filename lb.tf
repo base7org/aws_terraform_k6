@@ -48,7 +48,7 @@ resource "aws_lb_listener" "site_https" {
   }
 }
 
-resource "aws_route53_record" "site_lb-domain_record" {
+resource "aws_route53_record" "site_lb_domain_record" {
   zone_id = aws_route53_zone.site_zone.zone_id
   name    = var.site_domain
   type    = "A"

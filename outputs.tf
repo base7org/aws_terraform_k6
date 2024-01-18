@@ -25,15 +25,19 @@ output "site_private" {
 
 output "site_public-dns" {
   description = "The public DNS for the available instances."
-  value       = aws_eip.site_elastic-ip.*.public_dns
+  value       = aws_eip.site_ec2_elastic_ip.*.public_dns
 }
 
 output "site_public" {
   description = "The public IP for the available instances."
-  value       = aws_eip.site_elastic-ip.*.public_ip
+  value       = aws_eip.site_ec2_elastic_ip.*.public_ip
 }
 
 output "site_lb" {
   description = "The record used by the load balancer."
   value       = aws_lb.site_lb.dns_name
+}
+
+output "test_policy_arn" {
+  value = aws_iam_role.site_test_oidc.arn
 }

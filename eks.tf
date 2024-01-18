@@ -9,7 +9,7 @@ resource "aws_eks_cluster" "site_eks" {
 	endpoint_private_access = true
     endpoint_public_access  = true
   }
-  depends_on = [aws_cloudwatch_log_group.site_logs_eks, aws_internet_gateway.site_private_gateway]
+  depends_on = [aws_cloudwatch_log_group.site_logs_eks, aws_route_table_association.site_public_route_table_association, aws_route_table_association.site_private_route_table_association]
 }
 
 resource "aws_eks_node_group" "site_eks_node_group" {
@@ -17,7 +17,7 @@ resource "aws_eks_node_group" "site_eks_node_group" {
   node_group_name = "${var.site_name}-eks-node-group"
   version         = aws_eks_cluster.site_eks.version
   node_role_arn   = aws_iam_role.site_role.arn
-  subnet_ids      = concat(aws_subnet.site_public_subnet[*].id,  aws_subnet.site_private_subnet[*].id)
+  subnet_ids      = aws_subnet.site_private_subnet[*].id
   instance_types  = ["${var.site_instance_size}"]
   ami_type = "AL2_x86_64"
   scaling_config {
@@ -25,6 +25,7 @@ resource "aws_eks_node_group" "site_eks_node_group" {
     max_size     = 2
     min_size     = 1
   }
+  depends_on  = [aws_iam_role_policy_attachment.site_attachment, aws_subnet.site_private_subnet, aws_route_table_association.site_private_route_table_association]
 }
 
 # Update kubeconfig
