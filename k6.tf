@@ -27,13 +27,13 @@ resource "helm_release" "k6_influxdb" {
 # InfluxDB Secrets
 
 resource "aws_secretsmanager_secret" "k6_influxdb_secret_name" {
-  name = "${var.site_name}K6InfluxDBCredentials"
+  name = "InfluxDBCredentials"
   depends_on = [null_resource.update_kubeconfig]
 }
 
 resource "aws_secretsmanager_secret_version" "k6_influxdb_secret_add" {
   secret_id = aws_secretsmanager_secret.k6_influxdb_secret_name.name
-  secret_string = "InfluxDB"
+  secret_string = "InfluxDBSecret"
   depends_on = [aws_secretsmanager_secret.k6_influxdb_secret_name]
 }
 
@@ -169,13 +169,13 @@ resource "helm_release" "grafana" {
 # Grafana Secrets
 
 resource "aws_secretsmanager_secret" "k6_grafana_secret_name" {
-  name = "${var.site_name}K6GrafanaCredentials"
+  name = "GrafanaCredentials"
   depends_on = [null_resource.update_kubeconfig]
 }
 
 resource "aws_secretsmanager_secret_version" "k6_grafana_secret_add" {
   secret_id = aws_secretsmanager_secret.k6_grafana_secret_name.name
-  secret_string = "Grafana"
+  secret_string = "GrafanaSecret"
   depends_on = [aws_secretsmanager_secret.k6_grafana_secret_name]
 }
 

@@ -7,6 +7,7 @@ This is not the first nor will it be the last of its kind which uses Terraform t
 - [You must have aws-cli is configured with the appropriate credentials.](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
 - [You must have terraform and its own prerequisites installed.](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 - [You must have kubectl and its own prerequisites installed.](https://kubernetes.io/docs/tasks/tools/)
+- [Go is required for the k6-operators.](https://go.dev/doc/install)
 
 ## Notes
 
