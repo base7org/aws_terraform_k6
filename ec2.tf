@@ -23,15 +23,15 @@ resource "aws_instance" "site_instance" {
 
 }
 
-resource "aws_eip" "site_elastic-ip" {
+resource "aws_eip" "site_ec2_elastic_ip" {
   count            = length(aws_instance.site_instance.*.id)
   instance         = element(aws_instance.site_instance.*.id, count.index)
   public_ipv4_pool = "amazon"
   vpc              = true
 }
 
-resource "aws_eip_association" "site_elastic-ip_association" {
-  count         = length(aws_eip.site_elastic-ip)
+resource "aws_eip_association" "site_ec2_elastic_ip_association" {
+  count         = length(aws_eip.site_ec2_elastic_ip)
   instance_id   = element(aws_instance.site_instance.*.id, count.index)
-  allocation_id = element(aws_eip.site_elastic-ip.*.id, count.index)
+  allocation_id = element(aws_eip.site_ec2_elastic_ip.*.id, count.index)
 }

@@ -23,18 +23,29 @@ resource "aws_internet_gateway" "site_public_gateway" {
 
 resource "aws_route_table" "site_public_route_table" {
   vpc_id = aws_vpc.site_vpc.id
-}
-
-resource "aws_route" "site_public_route" {
-  route_table_id         = aws_route_table.site_public_route_table.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.site_public_gateway.id
+  route {
+      cidr_block                 = "0.0.0.0/0"
+      gateway_id                 = aws_internet_gateway.site_public_gateway.id
+  }
 }
 
 resource "aws_route_table_association" "site_public_route_table_association" {
   count          = length(aws_subnet.site_public_subnet) == 2 ? 2 : 0
   route_table_id = aws_route_table.site_public_route_table.id
   subnet_id      = element(aws_subnet.site_public_subnet.*.id, count.index)
+}
+
+resource "aws_eip" "site_public_eip" {
+  count            = length(aws_subnet.site_public_subnet.*.id)
+  vpc              = true
+  depends_on       = [aws_subnet.site_public_subnet]
+}
+
+resource "aws_nat_gateway" "site_public_nat" {
+  count         = length(aws_subnet.site_public_subnet) == 2 ? 2 : 0
+  allocation_id = element(aws_eip.site_public_eip.*.id, count.index)
+  subnet_id     = element(aws_subnet.site_public_subnet.*.id, count.index)
+  depends_on = [aws_internet_gateway.site_public_gateway]
 }
 
 # Private Subnet
@@ -46,24 +57,18 @@ resource "aws_subnet" "site_private_subnet" {
   cidr_block        = element(var.site_vpc_private_subnets, count.index)
 }
 
-resource "aws_internet_gateway" "site_private_gateway" {
-  vpc_id = aws_vpc.site_vpc.id
-  depends_on = [aws_route_table_association.site_public_route_table_association]
-}
-
 resource "aws_route_table" "site_private_route_table" {
   vpc_id = aws_vpc.site_vpc.id
-}
-
-resource "aws_route" "site_private_route" {
-  route_table_id         = aws_route_table.site_private_route_table.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.site_private_gateway.id
+  count = length(aws_nat_gateway.site_public_nat) == 2 ? 2 : 0
+  route {
+      cidr_block                 = "0.0.0.0/0"
+      nat_gateway_id             = element(aws_nat_gateway.site_public_nat.*.id, count.index)
+  }
 }
 
 resource "aws_route_table_association" "site_private_route_table_association" {
   count          = length(aws_subnet.site_private_subnet) == 2 ? 2 : 0
-  route_table_id = aws_route_table.site_private_route_table.id
+  route_table_id = element(aws_route_table.site_private_route_table.*.id, count.index)
   subnet_id      = element(aws_subnet.site_private_subnet.*.id, count.index)
 }
 
